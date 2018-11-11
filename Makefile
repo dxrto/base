@@ -1,3 +1,4 @@
+MAINTAINER?==@eater.me
 # Name of image
 IMAGE?=d.xr.to/base
 # Arch to be used
@@ -35,6 +36,7 @@ endif
 default: all	
 
 vars:
+	@echo MAINTAINER=$(MAINTAINER)
 	@echo IMAGE=$(IMAGE)
 	@echo ARCH=$(ARCH)
 	@echo REPO_ROOT=$(REPO_ROOT)
@@ -72,7 +74,7 @@ ifeq ($(TOOLBOX),busybox)
 	# Create busybox symlinks
 	xbps-uchroot $(BUILDDIR) /bin/busybox -- --list | while read i; do [ -e $(BUILDDIR)/usr/bin/$$i ] || ln -s /bin/busybox $(BUILDDIR)/usr/bin/$$i; done
 endif
-    # Remove xbps cache dir
+	# Remove xbps cache dir
 	rm -rf $(BUILDDIR)/var/cache/xbps
 	# Import custom bashrc
 	cp files/bashrc.bash $(BUILDDIR)/etc/bash/bashrc.d/docker.sh
@@ -87,7 +89,7 @@ endif
 
 install: build
 	# Import directory as tar (owned by root) into docker
-	tar --owner 0 --group 0 -pC $(BUILDDIR) -c . | docker import - $(IMAGE)
+	tar --owner 0 --group 0 -pC $(BUILDDIR) -c . | docker import -m '$(IMAGE) initialization from chroot' -c 'LABEL maintainer="$(MAINTAINER)"' - $(IMAGE)
 
 clean:
 	# Remove build directory

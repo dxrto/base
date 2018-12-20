@@ -10,7 +10,7 @@ REPO?=$(REPO_ROOT)$(if $(findstring musl, $(ARCH)),/musl)
 # Toolbox to be used (toybox, busybox, none or default)
 TOOLBOX?=toybox
 # Packages to install
-PACKAGES?=xbps bash ncurses-base
+PACKAGES?=xbps bash ncurses-base shadow
 # Directory where chroot should be build
 BUILDDIR?=$(PWD)/build
 ifeq ($(TOOLBOX),none)
@@ -65,7 +65,7 @@ build: ensure-toolbox
 	for dir in lib lib32 sbin bin; do [ -e $(BUILDDIR)/$$dir ] || ln -s usr/$$dir $(BUILDDIR)/$$dir; done
 	ln -s usr/lib $(BUILDDIR)/lib64
 	# Create default directories expected by void
-	for dir in proc sys dev tmp; do [ -d $(BUILDDIR)/$$dir ] || mkdir $(BUILDDIR)/$$dir; done
+	for dir in proc sys dev tmp run; do [ -d $(BUILDDIR)/$$dir ] || mkdir $(BUILDDIR)/$$dir; done
 ifeq ($(TOOLBOX),toybox)
 	# Create toybox symlinks
 	xbps-uchroot $(BUILDDIR) /bin/toybox | sed 's:\s:\n:g' | grep -v '^$$' | while read i; do [ -e $(BUILDDIR)/usr/bin/$$i ] || ln -s /bin/toybox $(BUILDDIR)/usr/bin/$$i; done
@@ -83,9 +83,10 @@ endif
 	# Create lsb_release file
 	cp files/lsb_release $(BUILDDIR)/bin/lsb_release
 	chmod +x $(BUILDDIR)/bin/lsb_release
-	# Create passwd and group file
-	echo 'root:x:0:0:root:/:/bin/bash' >> $(BUILDDIR)/etc/passwd
-	echo 'root:x:0:' >> $(BUILDDIR)/etc/group
+	# Create passwd, shadow and group file
+	cp files/passwd $(BUILDDIR)/etc/passwd
+	cp files/group $(BUILDDIR)/etc/group
+	cp files/shadow $(BUILDDIR)/etc/shadow
 
 install: build
 	# Import directory as tar (owned by root) into docker

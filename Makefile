@@ -1,4 +1,6 @@
 MAINTAINER?==@eater.me
+# Docker executable to use (default: docker, but img may be used)
+DOCKER_EXEC?=docker
 # Name of image
 IMAGE?=d.xr.to/base
 # Arch to be used
@@ -83,6 +85,11 @@ endif
 	# Create lsb_release file
 	cp files/lsb_release $(BUILDDIR)/bin/lsb_release
 	chmod +x $(BUILDDIR)/bin/lsb_release
+	# Create xbps helpers
+	cp files/xbps-remote $(BUILDDIR)/bin/xbps-remote
+	chmod +x $(BUILDDIR)/bin/xbps-remote
+	cp files/xbps-local $(BUILDDIR)/bin/xbps-local
+	chmod +x $(BUILDDIR)/bin/xbps-local
 	# Create passwd, shadow and group file
 	cp files/passwd $(BUILDDIR)/etc/passwd
 	cp files/group $(BUILDDIR)/etc/group
@@ -90,7 +97,7 @@ endif
 
 install: build
 	# Import directory as tar (owned by root) into docker
-	tar --owner 0 --group 0 -pC $(BUILDDIR) -c . | docker import -m '$(IMAGE) initialization from chroot' -c 'LABEL maintainer="$(MAINTAINER)"' - $(IMAGE)
+	tar --owner 0 --group 0 -pC $(BUILDDIR) -c . | $(DOCKER_EXEC) import -m '$(IMAGE) initialization from chroot' -c 'LABEL maintainer="$(MAINTAINER)"' - $(IMAGE)
 
 clean:
 	# Remove build directory

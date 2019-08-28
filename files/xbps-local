@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+xbps-install -yR /tmp/xbps "$@" && xbps-remove -Oo && rm -rf /var/cache/xbps/* /tmp/xbps

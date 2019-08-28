@@ -1,0 +1,14 @@
+---
+kind: pipeline
+name: default
+
+steps:
+- name: build
+  image: d.xr.to/img
+  privileged: true
+  commands:
+    - img login -u "drone" -p "$PASSWORD" d.xr.to
+    - PUSH=y DOCKER=img ./build-tagged.sh
+  environment:
+    PASSWORD:
+      from_secret: pass

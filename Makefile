@@ -13,6 +13,9 @@ TOOLBOX?=toybox
 PACKAGES?=xbps bash ncurses-base shadow
 # Directory where chroot should be build
 BUILDDIR?=$(PWD)/build
+# Executable used for making the docker container (e.g. img or docker)
+DOCKER_BUILDER?=docker
+
 ifeq ($(TOOLBOX),none)
 VALID_TOOLBOX?=1
 endif
@@ -90,7 +93,7 @@ endif
 
 install: build
 	# Import directory as tar (owned by root) into docker
-	tar --owner 0 --group 0 -pC $(BUILDDIR) -c . | docker import -m '$(IMAGE) initialization from chroot' -c 'LABEL maintainer="$(MAINTAINER)"' - $(IMAGE)
+	tar --owner 0 --group 0 -pC $(BUILDDIR) -c . | $(DOCKER_BUILDER) import -m '$(IMAGE) initialization from chroot' -c 'LABEL maintainer="$(MAINTAINER)"' - $(IMAGE)
 
 clean:
 	# Remove build directory
